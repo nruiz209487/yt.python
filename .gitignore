@@ -1,0 +1,38 @@
+# Entornos virtuales
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# Archivos de Python compilados
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Archivos de logs
+*.log
+
+# Configuración de IDEs
+.vscode/
+.idea/
+*.swp
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Salidas de build
+build/
+dist/
+*.egg-info/
+
+# Específico de Kivy
+*.atlas
+*.pyo
+
+# Si usas pyinstaller
+*.spec
+
+# Otros
+*.bak
