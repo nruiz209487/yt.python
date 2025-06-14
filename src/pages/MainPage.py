@@ -5,6 +5,7 @@ from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.screenmanager import Screen
 from kivy.uix.image import Image
+from kivy.uix.widget import Widget
 from kivy.core.window import Window
 from Controllers.MainPageController import MainPageController
 
@@ -14,174 +15,224 @@ class MainScreen(Screen):
         super().__init__(**kwargs)
         self.controller = MainPageController(self)
         
-        # Set white background for the screen
-        Window.clearcolor = (1, 1, 1, 1)  # RGBA white
+        # Fondo azul claro moderno
+        Window.clearcolor = (0.94, 0.96, 0.98, 1)
         
-        # Main vertical layout
-        self.layout = BoxLayout(
+        # Layout principal
+        main_layout = BoxLayout(
             orientation='vertical',
-            padding=20,
-            spacing=10,
-            size_hint=(1, 1)
+            padding=25,
+            spacing=20
         )
-        self.add_widget(self.layout)
+        self.add_widget(main_layout)
 
-        # About Us button
-        self.nav_HistoryButton = Button(
-            text="Registros",
-            size_hint=(1, None),
-            height=50,
-            background_color=(0.3, 0.3, 0.3, 1),
-            color=(1, 1, 1, 1)
-        )
-        self.nav_HistoryButton.bind(on_press=self.nav_HistoryPage)
-        self.layout.add_widget(self.nav_HistoryButton)
-
-        # About Us button
-        self.nav_MusicReproductorButton = Button(
-            text="Reproductor",
-            size_hint=(1, None),
-            height=50,
-            background_color=(0.3, 0.3, 0.3, 1),
-            color=(1, 1, 1, 1)
-        )
-        self.nav_MusicReproductorButton.bind(on_press=self.nav_MusicReproductorPage)
-        self.layout.add_widget(self.nav_MusicReproductorButton)
-
-        # About Us button
-        self.nav_VideoPlayerButton = Button(
-            text="Reproductor",
-            size_hint=(1, None),
-            height=50,
-            background_color=(0.3, 0.3, 0.3, 1),
-            color=(1, 1, 1, 1)
-        )
-        self.nav_VideoPlayerButton.bind(on_press=self.nav_VideoPlayerPage)
-        self.layout.add_widget(self.nav_VideoPlayerButton)
-
-                # Archive button
-        self.nav_GalleryButton = Button(
-            text="Galeria",
-            size_hint=(1, None),
-            height=50,
-            background_color=(0.3, 0.3, 0.3, 1),
-            color=(1, 1, 1, 1)
-        )
-        self.nav_GalleryButton.bind(on_press=self.nav_GalleryPage)
-        self.layout.add_widget(self.nav_GalleryButton)
-
-        # Centered container for the logo
-        self.logo_container = BoxLayout(
-            orientation='vertical',
-            size_hint=(1, None),
-            height=200,
-            padding=[0, 20, 0, 20]
-        )
-        self.layout.add_widget(self.logo_container)
-        
-        # Logo - centered with proper alignment
-        self.logo = Image(
-            source="src/public/images/imgbase.png",
-            size_hint=(None, None),
-            size=(150, 150),
-            allow_stretch=True,
-            pos_hint={'center_x': 0.5, 'center_y': 0.5}
-        )
-        self.logo_container.add_widget(self.logo)
-
-        # Input URL
-        self.url_input = TextInput(
-            hint_text="Introduce una URL",
-            multiline=False,
-            size_hint=(1, None),
-            height=40,
-            background_color=(1, 1, 1, 1),
-            foreground_color=(0, 0, 0, 1),
-            hint_text_color=(0.5, 0.5, 0.5, 1)
-        )
-        self.url_input.bind(text=self.on_input_change)
-        self.layout.add_widget(self.url_input)
-
-        # Label de error
-        self.error_label = Label(
-            text="",
-            color=(1, 0, 0, 1),
-            font_size=14,
-            size_hint=(1, None),
-            height=20
-        )
-        self.layout.add_widget(self.error_label)
-
-        # Download buttons layout
-        self.buttons_layout = BoxLayout(
+        # === HEADER ===
+        header_layout = BoxLayout(
             orientation='horizontal',
-            spacing=10,
             size_hint=(1, None),
             height=50
         )
-        self.layout.add_widget(self.buttons_layout)
+        main_layout.add_widget(header_layout)
         
-        # Video button
-        self.video_button = Button(
-            text="Video",
-            disabled=True,
-            background_color=(0.2, 0.6, 1, 1),
-            color=(1, 1, 1, 1)
+        # Espaciador izquierdo
+        header_layout.add_widget(Widget())
+        
+        # Botón de registros
+        self.nav_HistoryButton = Button(
+            text="Registros",
+            size_hint=(None, None),
+            size=(120, 40),
+            background_color=(0.25, 0.35, 0.45, 1),
+            color=(1, 1, 1, 1),
+            font_size=14
         )
-        self.video_button.bind(on_press=lambda x: self.controller.descargar("Video"))
-        
-        # Audio button
-        self.audio_button = Button(
-            text="Audio",
-            disabled=True,
-            background_color=(0.2, 0.6, 1, 1),
-            color=(1, 1, 1, 1)
-        )
-        self.audio_button.bind(on_press=lambda x: self.controller.descargar("Audio"))
-        
-        # Image button
-        self.image_button = Button(
-            text="Imagen",
-            disabled=True,
-            background_color=(0.2, 0.6, 1, 1),
-            color=(1, 1, 1, 1)
-        )
-        self.image_button.bind(on_press=lambda x: self.controller.descargar("Imagen"))
-        
-        self.buttons_layout.add_widget(self.video_button)
-        self.buttons_layout.add_widget(self.audio_button)
-        self.buttons_layout.add_widget(self.image_button)
+        self.nav_HistoryButton.bind(on_press=self.nav_HistoryPage)
+        header_layout.add_widget(self.nav_HistoryButton)
 
+        # === CONTENIDO PRINCIPAL ===
+        content_layout = BoxLayout(
+            orientation='vertical',
+            spacing=25,
+            size_hint=(0.85, 1),
+            pos_hint={'center_x': 0.5}
+        )
+        main_layout.add_widget(content_layout)
 
-        # Loading image
-        self.loading_image = Image(
+        # Título
+        title = Label(
+            text="Descargador Multimedia",
+            font_size=24,
+            color=(0.2, 0.3, 0.4, 1),
+            size_hint=(1, None),
+            height=40,
+            bold=True
+        )
+        content_layout.add_widget(title)
+
+        # Subtítulo
+        subtitle = Label(
+            text="Descarga videos, audio e imágenes desde URLs",
+            font_size=14,
+            color=(0.5, 0.5, 0.5, 1),
+            size_hint=(1, None),
+            height=25
+        )
+        content_layout.add_widget(subtitle)
+
+        # Espaciador
+        content_layout.add_widget(Widget(size_hint=(1, 0.3)))
+
+        # Logo
+        logo_container = BoxLayout(
+            orientation='vertical',
+            size_hint=(1, None),
+            height=120
+        )
+        content_layout.add_widget(logo_container)
+        
+        self.logo = Image(
             source="src/public/images/imgbase.png",
             size_hint=(None, None),
             size=(100, 100),
+            pos_hint={'center_x': 0.5}
+        )
+        logo_container.add_widget(self.logo)
+
+        # Espaciador
+        content_layout.add_widget(Widget(size_hint=(1, 0.2)))
+
+        # === SECCIÓN DE INPUT ===
+        input_section = BoxLayout(
+            orientation='vertical',
+            spacing=15,
+            size_hint=(1, None),
+            height=120
+        )
+        content_layout.add_widget(input_section)
+
+        # Campo de URL
+        self.url_input = TextInput(
+            hint_text="Introduce la URL aquí",
+            multiline=False,
+            size_hint=(1, None),
+            height=45,
+            background_color=(1, 1, 1, 1),
+            foreground_color=(0.2, 0.2, 0.2, 1),
+            font_size=16,
+            padding=[15, 10]
+        )
+        self.url_input.bind(text=self.on_input_change)
+        input_section.add_widget(self.url_input)
+
+        # Mensaje de error
+        self.error_label = Label(
+            text="",
+            color=(0.8, 0.2, 0.2, 1),
+            font_size=13,
+            size_hint=(1, None),
+            height=25,
+            text_size=(None, None)
+        )
+        input_section.add_widget(self.error_label)
+
+        # === BOTONES DE DESCARGA ===
+        buttons_container = BoxLayout(
+            orientation='vertical',
+            spacing=15,
+            size_hint=(1, None),
+            height=120
+        )
+        content_layout.add_widget(buttons_container)
+
+        # Texto informativo
+        info_label = Label(
+            text="Selecciona el tipo de descarga:",
+            font_size=14,
+            color=(0.4, 0.4, 0.4, 1),
+            size_hint=(1, None),
+            height=25
+        )
+        buttons_container.add_widget(info_label)
+
+        # Botones
+        buttons_layout = BoxLayout(
+            orientation='horizontal',
+            spacing=15,
+            size_hint=(1, None),
+            height=50
+        )
+        buttons_container.add_widget(buttons_layout)
+        
+        # Botón Video
+        self.video_button = Button(
+            text="Video",
+            disabled=True,
+            background_color=(0.2, 0.6, 0.9, 1),
+            background_disabled_normal='',
+            color=(1, 1, 1, 1),
+            font_size=16
+        )
+        self.video_button.bind(on_press=lambda x: self.controller.descargar("Video"))
+        buttons_layout.add_widget(self.video_button)
+        
+        # Botón Audio
+        self.audio_button = Button(
+            text="Audio",
+            disabled=True,
+            background_color=(0.9, 0.5, 0.2, 1),
+            background_disabled_normal='',
+            color=(1, 1, 1, 1),
+            font_size=16
+        )
+        self.audio_button.bind(on_press=lambda x: self.controller.descargar("Audio"))
+        buttons_layout.add_widget(self.audio_button)
+        
+        # Botón Imagen
+        self.image_button = Button(
+            text="Imagen",
+            disabled=True,
+            background_color=(0.3, 0.7, 0.4, 1),
+            background_disabled_normal='',
+            color=(1, 1, 1, 1),
+            font_size=16
+        )
+        self.image_button.bind(on_press=lambda x: self.controller.descargar("Imagen"))
+        buttons_layout.add_widget(self.image_button)
+
+        # Espaciador final
+        content_layout.add_widget(Widget(size_hint=(1, 0.5)))
+
+        # === INDICADOR DE CARGA ===
+        loading_layout = BoxLayout(
+            orientation='vertical',
+            spacing=10,
+            size_hint=(1, None),
+            height=80
+        )
+        content_layout.add_widget(loading_layout)
+        
+        self.loading_image = Image(
+            source="src/public/images/imgbase.png",
+            size_hint=(None, None),
+            size=(40, 40),
             opacity=0,
             pos_hint={'center_x': 0.5}
         )
-        self.layout.add_widget(self.loading_image)
-
-
-
+        loading_layout.add_widget(self.loading_image)
+        
+        self.loading_label = Label(
+            text="Procesando...",
+            color=(0.4, 0.4, 0.4, 1),
+            font_size=12,
+            opacity=0,
+            size_hint=(1, None),
+            height=20
+        )
+        loading_layout.add_widget(self.loading_label)
 
     def nav_HistoryPage(self, instance):
         app = App.get_running_app()
         app.root.current = 'HistoryPage'
-
-    def nav_MusicReproductorPage(self, instance):
-        app = App.get_running_app()
-        app.root.current = 'MusicReproductorPage'
-
-    def nav_GalleryPage(self, instance):
-        app = App.get_running_app()
-        app.root.current = 'GalleryPage'
-
-    def nav_VideoPlayerPage(self, instance):
-        app = App.get_running_app()
-        app.root.current = 'VideoPlayerPage'
-
 
     def toggle_buttons(self, enabled):
         self.video_button.disabled = not enabled
@@ -190,3 +241,9 @@ class MainScreen(Screen):
 
     def on_input_change(self, instance, value):
         self.controller.validar_input(value)
+        
+    def show_loading(self, show=True):
+        """Mostrar/ocultar indicador de carga"""
+        opacity = 1 if show else 0
+        self.loading_image.opacity = opacity
+        self.loading_label.opacity = opacity

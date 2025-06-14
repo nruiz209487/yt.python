@@ -52,39 +52,101 @@ class Downloader:
             print(f"Error al descargar video simple: {e}")
             return False
 
+ 
+
     @staticmethod
     def descargar_video_con_ffmpeg(url):
-        outtmpl = os.path.join(get_download_path(), '%(title)s.%(ext)s')
+        """Descarga video con FFmpeg y manejo correcto de archivos"""
+        download_path = get_download_path()
+        
         try:
             ffmpeg_path = os.getenv('FFMPEG_PATH')
             if not ffmpeg_path:
                 raise Exception("FFmpeg no está configurado correctamente en el archivo .env")
 
+            # Primero obtenemos la información del video para generar el nombre correcto
+            info_opciones = {
+                'quiet': True,
+                'ffmpeg_location': ffmpeg_path,
+            }
+            
+            with yt_dlp.YoutubeDL(info_opciones) as ydl:
+                info = ydl.extract_info(url, download=False)
+                if not info:
+                    raise Exception("No se pudo obtener información del video")
+                
+                # Limpiar el título para crear el nombre de archivo
+                titulo_limpio = re.sub(r'[\\/*?:"<>|]', "", info.get('title', 'video'))
+                final_filename = f"{titulo_limpio}.mp4"
+                final_path = os.path.join(download_path, final_filename)
+            
+            # Template de salida que coincida con el nombre final esperado
+            outtmpl = os.path.join(download_path, f"{titulo_limpio}.%(ext)s")
+            
+            # Opciones mejoradas para yt-dlp
             opciones = {
-                'format': 'bestvideo+bestaudio',
+                'format': 'bestvideo+bestaudio/best',
                 'outtmpl': outtmpl,
                 'quiet': False,
                 'ffmpeg_location': ffmpeg_path,
-                'postprocessors': [{'key': 'FFmpegMerger'}],
                 'merge_output_format': 'mp4',
                 'noplaylist': True,
+                'writeinfojson': False,
+                'writesubtitles': False,
+                'keepvideo': False,
+                # Configuración de post-procesamiento
+                'postprocessors': [{
+                    'key': 'FFmpegVideoConvertor',
+                    'preferedformat': 'mp4',
+                }],
             }
 
+            print(f"Iniciando descarga: {titulo_limpio}")
+            print(f"Destino esperado: {final_path}")
+            
             with yt_dlp.YoutubeDL(opciones) as ydl:
-                info = ydl.extract_info(url, download=True)
-                if info:
-                    titulo_limpio = re.sub(r'[\\/*?:"<>|]', "", info.get('title', 'video'))
-                    nombre_archivo = f"{titulo_limpio}.mp4"
-
-                    file = FileModel(nombre_archivo=nombre_archivo, tipo_archivo='video')
-                    ServiceDB.insertarArchivo(file)
-                    print(f"Video registrado en base de datos: {file}")
-
+                # Realizar la descarga
+                ydl.download([url])
+            
+            # Verificar que el archivo final existe
+            # Esperar un poco para que el sistema termine de escribir el archivo
+            import time
+            time.sleep(1)
+            
+            # Buscar el archivo descargado (puede tener un nombre ligeramente diferente)
+            archivos_descargados = []
+            for archivo in os.listdir(download_path):
+                if archivo.startswith(titulo_limpio) and archivo.endswith('.mp4'):
+                    archivos_descargados.append(archivo)
+            
+            if archivos_descargados:
+                # Tomar el archivo más reciente si hay varios
+                archivo_final = max(archivos_descargados, 
+                                  key=lambda x: os.path.getmtime(os.path.join(download_path, x)))
+                ruta_final = os.path.join(download_path, archivo_final)
+                
+                print(f"✅ Descarga completada: {ruta_final}")
+                
+                # Registrar en base de datos
+                file = FileModel(nombre_archivo=archivo_final, tipo_archivo='video')
+                ServiceDB.insertarArchivo(file)
+                print(f"📁 Video registrado en base de datos: {file}")
+                
                 return True
-
+            else:
+                print(f"❌ No se encontró el archivo descargado en: {download_path}")
+                # Listar archivos para debug
+                print("Archivos en la carpeta de descarga:")
+                for archivo in os.listdir(download_path):
+                    if archivo.endswith(('.mp4', '.mkv', '.webm')):
+                        print(f"  - {archivo}")
+                return False
+                    
         except Exception as e:
-            print(f"Error al descargar video con ffmpeg: {e}")
+            print(f"❌ Error al descargar video con ffmpeg: {e}")
             return False
+
+
         
     @staticmethod
     def descargar_audio(url, format='bestaudio'):
